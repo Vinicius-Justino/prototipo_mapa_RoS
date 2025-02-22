@@ -1,18 +1,13 @@
-#include <stdio.h>
-#include <stdlib.h>
+#include </home/cardoos/codigos/C/prototipo_mapa_RoS/ruas/ruas.c>
 
 struct node {
-    int valor[2];
+    struct rua conteudo;
     struct node *proximo;
 };
 
-struct node* cria_node(int coordenadas[]);
-void coloca_node(struct node **lista, struct node *endereco_node_novo, int indice);
-void apaga_node(struct node **lista, int indice);
-int* valor_node(struct node *lista, int indice);
-
-int tamanho_lista(struct node *lista);
-void mostra_lista(struct node *lista);
+struct node* cria_node(int coordenadas[2], char restricao[4]);
+void coloca_node(struct node **lista, struct node *endereco_node_novo);
+struct rua conteudo_node(struct node *lista, int indice);
 void apaga_lista(struct node *lista);
 
 /* int main(void) {
@@ -20,28 +15,20 @@ void apaga_lista(struct node *lista);
 
     for (int i = 0; i <= 9; i++) {
         int coordenadas[2] = {i, i};
-        coloca_node(&inicio_lista, cria_node(coordenadas), tamanho_lista(inicio_lista));
+        char saidas_determinadas[4] = {INDEFINIDO, INDEFINIDO, INDEFINIDO, INDEFINIDO};
+        coloca_node(&inicio_lista, cria_node(coordenadas, saidas_determinadas));
     }
 
-    int coordenadas[2] = {10, 10};
-    coloca_node(&inicio_lista, cria_node(coordenadas), 5);
-    apaga_node(&inicio_lista, 5);
-    apaga_node(&inicio_lista, 0);
-    apaga_node(&inicio_lista, tamanho_lista(inicio_lista) - 1);
-    
-    mostra_lista(inicio_lista);
-
-    int *node5 = valor_node(inicio_lista, 5);
-    printf("%d\n", node5[0]);
+    struct rua node5 = conteudo_node(inicio_lista, 5);
+    printf("(%d, %d)\n", node5.coordenadas[0], node5.coordenadas[1]);
 
     apaga_lista(inicio_lista);
     return 0;
 } */
 
-struct node* cria_node(int coordenadas[]) {
+struct node* cria_node(int coordenadas[2], char restricao[4]) {
     struct node node_novo;
-    node_novo.valor[0] = coordenadas[0];
-    node_novo.valor[1] = coordenadas[1];
+    node_novo.conteudo = cria_rua(coordenadas, restricao);
     node_novo.proximo = NULL;
     
     struct node *endereco_node = malloc(sizeof(struct node));
@@ -50,81 +37,20 @@ struct node* cria_node(int coordenadas[]) {
     return endereco_node;
 }
 
-void coloca_node(struct node **lista, struct node *endereco_node_novo, int indice) {
-    if (indice < 0 || indice > tamanho_lista(*lista)) {
-        return;
-    }
-
+void coloca_node(struct node **lista, struct node *endereco_node_novo) {
     (*endereco_node_novo).proximo = *lista;
-    if (indice == 0) {
-        *lista = endereco_node_novo;
-        return;
-    }
+    *lista = endereco_node_novo;
 
-    for (int i = 1; i < indice; i++) {
-        (*endereco_node_novo).proximo = (*(*endereco_node_novo).proximo).proximo;
-    }
-
-    struct node *node_anterior = (*endereco_node_novo).proximo;
-    (*endereco_node_novo).proximo = (*(*endereco_node_novo).proximo).proximo;
-    (*node_anterior).proximo = endereco_node_novo;
+    return;
 }
 
-void apaga_node(struct node **lista, int indice) {
-    if (indice < 0 || indice >= tamanho_lista(*lista)) {
-        return;
-    }
-
-    struct node *anterior = *lista;
-    if (indice == 0) {
-        *lista = (*anterior).proximo;
-        free(anterior);
-        return;
-    }
-
-    for (int i = 1; i < indice; i++) {
-        anterior = (*anterior).proximo;
-    }
-
-    struct node *excluido = (*anterior).proximo;
-    (*anterior).proximo = (*excluido).proximo;
-    free(excluido);
-}
-
-int* valor_node(struct node *lista, int indice) {
-    if (indice < 0 || indice >= tamanho_lista(lista)) {
-        return 0;
-    }
-
+struct rua conteudo_node(struct node *lista, int indice) {
     struct node *node_atual = lista;
     for (int i = 0; i < indice; i++) {
         node_atual = (*node_atual).proximo;
     }
 
-    return (*node_atual).valor;
-}
-
-int tamanho_lista(struct node *lista) {
-    struct node *node_atual = lista;
-    int tamanho = 0;
-
-    while (node_atual != NULL) {
-        tamanho++;
-        node_atual = (*node_atual).proximo;
-    }
-
-    return tamanho;
-}
-
-void mostra_lista(struct node *lista) {
-    struct node *node_atual = lista;
-
-    while (node_atual != NULL) {
-        printf("(%d, %d) -> ", (*node_atual).valor[0], (*node_atual).valor[1]);
-        node_atual = (*node_atual).proximo;
-    }
-
-    printf("NULL\n");
+    return (*node_atual).conteudo;
 }
 
 void apaga_lista(struct node *lista) {
