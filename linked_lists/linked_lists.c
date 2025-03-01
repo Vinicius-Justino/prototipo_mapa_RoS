@@ -7,7 +7,6 @@ struct node {
 
 struct node* cria_node(int coordenadas[2], char restricao[4]);
 void coloca_node(struct node **lista, struct node *endereco_node_novo);
-struct rua conteudo_node(struct node *lista, int indice);
 void apaga_lista(struct node *lista);
 
 /* int main(void) {
@@ -19,9 +18,13 @@ void apaga_lista(struct node *lista);
         coloca_node(&inicio_lista, cria_node(coordenadas, saidas_determinadas));
     }
 
-    struct rua node5 = conteudo_node(inicio_lista, 5);
-    printf("(%d, %d)\n", node5.coordenadas[0], node5.coordenadas[1]);
+    struct node *rua_atual = inicio_lista;
+    while (rua_atual != NULL) {
+        printf("(%d, %d) -> ", (*rua_atual).conteudo.coordenadas[0], (*rua_atual).conteudo.coordenadas[1]);
+        rua_atual = (*rua_atual).proximo;
+    }
 
+    printf("NULL \n");
     apaga_lista(inicio_lista);
     return 0;
 } */
@@ -42,15 +45,6 @@ void coloca_node(struct node **lista, struct node *endereco_node_novo) {
     *lista = endereco_node_novo;
 
     return;
-}
-
-struct rua conteudo_node(struct node *lista, int indice) {
-    struct node *node_atual = lista;
-    for (int i = 0; i < indice; i++) {
-        node_atual = (*node_atual).proximo;
-    }
-
-    return (*node_atual).conteudo;
 }
 
 void apaga_lista(struct node *lista) {

@@ -9,29 +9,46 @@ struct fileira {
 };
 
 struct fileira* cria_table();
-int algoritmo_hash(int coordenadas[2]);
-void coloca_rua(struct fileira *table, int coordenadas[2], char restricao[4]);
-char rua_existe(struct fileira *table, int coordenadas[2]);
-
 void apaga_table(struct fileira *table);
+
+int algoritmo_hash(int coordenadas[2]);
+
+void coloca_rua(struct fileira *table, int coordenadas[2], char restricao[4]);
+struct rua acessa_rua(struct fileira *table, int coordenadas[2]);
+
+const struct rua RUA_NAO_EXISTE = {
+    {0, 0},
+    {INDEFINIDO, INDEFINIDO, INDEFINIDO, INDEFINIDO}
+};
 
 /* int main(void) {
     struct fileira *inicio_table = cria_table();
 
-    for (int x = 0; x < 25; x++) {
-        for (int y = 0; y < 25; y++) {
+    for (int x = -14; x < 15; x++) {
+        for (int y = -14; y < 15; y++) {
             int coordenadas[2] = {x, y};
             char saidas_determinadas[4] = {INDEFINIDO, INDEFINIDO, INDEFINIDO, INDEFINIDO};
             coloca_rua(inicio_table, coordenadas, saidas_determinadas);
         }
     }
 
-    int coordenadas_existentes[2] = {20, 20};
-    int coordenadas_inexistentes[2] = {30, 30};
-    printf("%d, %d\n",
-        rua_existe(inicio_table, coordenadas_existentes),
-        rua_existe(inicio_table, coordenadas_inexistentes)
-    );
+    struct fileira *fileira_atual = inicio_table;
+    while (fileira_atual != NULL) {
+        printf("%d: ", (*fileira_atual).indice);
+
+        int cont_ruas = 0;
+        struct node *rua_atual = (*fileira_atual).itens;
+        while (rua_atual != NULL) {
+            cont_ruas++;
+            //printf("(%d, %d) -> ", (*rua_atual).conteudo.coordenadas[0], (*rua_atual).conteudo.coordenadas[1]);
+            
+            rua_atual = (*rua_atual).proximo;
+        }
+
+        printf("%d \n", cont_ruas);
+        //printf("NULL \n");
+        fileira_atual = (*fileira_atual).proxima;
+    }
 
     apaga_table(inicio_table);
     return 0;
@@ -58,10 +75,12 @@ struct fileira* cria_table() {
 }
 
 int algoritmo_hash(int coordenadas[2]) {
-    int x = coordenadas[0] * (1 - 2 * (coordenadas[0] < 0)),
-        y = coordenadas[1] * (1 - 2 * (coordenadas[1] < 0));
+    int x = coordenadas[0], y = coordenadas[1];
+
+    x = (x < 0) ? ((QUANTIDADE_FILEIRAS + (x % -QUANTIDADE_FILEIRAS)) - 1) : (x % QUANTIDADE_FILEIRAS);
+    y = (y < 0) ? ((QUANTIDADE_FILEIRAS + (y % -QUANTIDADE_FILEIRAS)) - 1) : (y % QUANTIDADE_FILEIRAS);
     
-    return (x % QUANTIDADE_FILEIRAS) / (int)(sqrt(QUANTIDADE_FILEIRAS)) + (y % QUANTIDADE_FILEIRAS) / (int)(sqrt(QUANTIDADE_FILEIRAS)) * (int)(sqrt(QUANTIDADE_FILEIRAS));
+    return x / (int)(sqrt(QUANTIDADE_FILEIRAS)) + y / (int)(sqrt(QUANTIDADE_FILEIRAS)) * (int)(sqrt(QUANTIDADE_FILEIRAS));
 }
 
 void coloca_rua(struct fileira *table, int coordenadas[2], char restricao[4]) {
@@ -75,7 +94,7 @@ void coloca_rua(struct fileira *table, int coordenadas[2], char restricao[4]) {
     coloca_node(&((*fileira_certa).itens), cria_node(coordenadas, restricao));
 }
 
-char rua_existe(struct fileira *table, int coordenadas[2]) {
+struct rua acessa_rua(struct fileira *table, int coordenadas[2]) {
     int fileira_rua = algoritmo_hash(coordenadas);
 
     struct fileira* fileira_certa = table;
@@ -86,13 +105,13 @@ char rua_existe(struct fileira *table, int coordenadas[2]) {
     struct node *node_atual = (*fileira_certa).itens;
     while (node_atual != NULL) {
         if ((*node_atual).conteudo.coordenadas[0] == coordenadas[0] && (*node_atual).conteudo.coordenadas[1] == coordenadas[1]) {
-            return 1;
+            return (*node_atual).conteudo;
         }
 
         node_atual = (*node_atual).proximo;
     }
 
-    return 0;
+    return RUA_NAO_EXISTE;
 }
 
 void apaga_table(struct fileira *table) {
